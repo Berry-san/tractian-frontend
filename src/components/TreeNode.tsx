@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useSelectedItemStore } from '../store/itemStore'
 import downArrow from '../assets/icons/downArrow.svg'
 import locationIcon from '../assets/icons/location.svg'
 import assetIcon from '../assets/icons/asset.svg'
@@ -8,22 +9,34 @@ import failure from '../assets/icons/failure.svg'
 import greenSpark from '../assets/icons/greenSpark.svg'
 
 interface TreeNodeProps {
+  id: string
   name: string
   type: 'location' | 'asset' | 'component'
   children?: TreeNodeProps[]
-  status?: 'operating' | 'critical' | 'idle' | null
+  status?: 'operating' | 'critical' | 'alert' | null
+  sensorType?: 'energy' | 'vibration' | null
+  sensorId?: string | null // Include sensorId here
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
+  id,
   name,
   type,
   children,
   status,
+  sensorId, // Make sure to accept sensorId here
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const { setSelectedItem } = useSelectedItemStore()
 
   const toggleOpen = () => {
     setIsOpen(!isOpen)
+  }
+  console.log(sensorId)
+
+  const handleClick = () => {
+    // Ensure sensorId is passed when setting the selected item
+    setSelectedItem({ id, name, type, status, sensorId })
   }
 
   const getIcon = () => {
@@ -36,16 +49,16 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   }
 
   const getStatusIcon = () => {
-    if (status === 'critical') return <img src={failure} alt="" /> // Critical status (red)
-    if (status === 'operating') return <img src={success} alt="" /> // Operating status (green)
-    if (status === 'idle') return <img src={greenSpark} alt="" /> // Idle status (white)
+    if (status === 'critical') return <img src={failure} alt="" />
+    if (status === 'operating') return <img src={success} alt="" />
+    if (status === 'alert') return <img src={greenSpark} alt="" />
     return null
   }
 
   return (
     <div className="mb-2">
       <div
-        onClick={toggleOpen}
+        onClick={children && children.length > 0 ? toggleOpen : handleClick} // Toggle if children exist, otherwise select the item
         className="cursor-pointer flex items-center space-x-2 mb-2"
       >
         {children && children.length > 0 ? (
@@ -59,6 +72,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         ) : (
           <div className="ml-2 w-2.5" /> // Empty placeholder for alignment
         )}
+
         {getIcon()}
         <span className="ml-2">{name}</span>
         {status && <span>{getStatusIcon()}</span>}

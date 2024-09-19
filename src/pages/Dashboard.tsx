@@ -1,16 +1,38 @@
-import React from 'react'
-import { useFilterStore } from '../store/filterStore'
-import { useCompanyStore } from '../store/companyStore'
+import { useSelectedItemStore } from '../store/itemStore'
 import motor1 from '../assets/images/motor1.png'
 import sensor from '../assets/icons/sensor.svg'
 import receptor from '../assets/icons/receptor.svg'
+import greenSpark from '../assets/icons/greenSpark.svg'
+import failure from '../assets/icons/failure.svg'
+import success from '../assets/icons/success.svg'
 
 const Dashboard: React.FC = () => {
-  return (
-    <div className="flex flex-col font-inter">
-      {/* Filter Buttons */}
+  const { selectedItem } = useSelectedItemStore()
 
-      {/* Main Dashboard Content */}
+  const getStatusIcon = () => {
+    if (selectedItem?.status === 'critical') return <img src={failure} alt="" />
+    if (selectedItem?.status === 'operating')
+      return <img src={success} alt="" />
+    if (selectedItem?.status === 'alert') return <img src={greenSpark} alt="" />
+    return null
+  }
+
+  if (!selectedItem) {
+    return (
+      <div className="p-5">
+        <p>
+          No asset or component selected. Please select one from the tree view.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col font-inter divide-y">
+      <div className="py-2 px-5 space-x-2 text-xl font-semibold items-center flex">
+        <span>{selectedItem.name}</span>
+        <span>{getStatusIcon()}</span>
+      </div>
       <div className="p-5">
         <section className="grid grid-cols-2 pb-4 border-b border-gray-300 gap-5 items-center justify-center">
           <div className="col-span-2 md:col-span-1">
@@ -39,14 +61,14 @@ const Dashboard: React.FC = () => {
           <div className="space-y-2">
             <h2 className="font-semibold text-base">Sensor</h2>
             <div className="col-span-2 md:col-span-1 space-x-3 flex items-center">
-              <img src={sensor} alt="" className="w-5 h-5" />
-              <p className="text-[#88929C]">HIO4510</p>
+              <img src={sensor} alt="sensor" className="w-5 h-5" />
+              <p className="text-[#88929C]">{selectedItem.sensorId || 'N/A'}</p>
             </div>
           </div>
           <div className="space-y-2">
-            <h2 className="font-semibold text-base">Receptor</h2>
+            <h2 className="font-semibold  text-base">Receptor</h2>
             <div className="col-span-2 md:col-span-1 space-x-3 flex items-center">
-              <img src={receptor} alt="" className="w-5 h-5" />
+              <img src={receptor} alt="receptor" className="w-5 h-5" />
               <p className="text-[#88929C]">EUH4R27</p>
             </div>
           </div>
